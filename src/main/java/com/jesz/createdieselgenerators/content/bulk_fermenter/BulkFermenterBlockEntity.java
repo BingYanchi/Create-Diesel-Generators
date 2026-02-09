@@ -70,6 +70,8 @@ public class BulkFermenterBlockEntity extends SmartBlockEntity implements IMulti
     public int processingTime = -1;
     BulkFermentingRecipe currentRecipe;
 
+    boolean needCheckRecipe = false;
+
     BlazeBurnerBlock.HeatLevel highestHeatLevel = BlazeBurnerBlock.HeatLevel.NONE;
     public BulkFermenterBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -130,6 +132,18 @@ public class BulkFermenterBlockEntity extends SmartBlockEntity implements IMulti
     }
     @Override
     public void tick() {
+        if (needCheckRecipe) {
+            needCheckRecipe = false;
+
+            List<Recipe<?>> r = getMatchingRecipes();
+            if (!r.contains(currentRecipe)) {
+                processingTime = -1;
+            }
+            if (processingTime == -1 && !r.isEmpty()) {
+                currentRecipe = (BulkFermentingRecipe) r.get(0);
+                startProcessing();
+            }
+        }
 
         if (isController()) {
             if (processingTime >= 0) {
@@ -236,15 +250,7 @@ public class BulkFermenterBlockEntity extends SmartBlockEntity implements IMulti
         if (!hasLevel())
             return;
 
-        List<Recipe<?>> r = getMatchingRecipes();
-        if (!r.contains(currentRecipe)) {
-            processingTime = -1;
-        }
-        if (processingTime == -1 && !r.isEmpty()) {
-            currentRecipe = (BulkFermentingRecipe) r.get(0);
-            startProcessing();
-        }
-
+        needCheckRecipe = true;
 
         for (int yOffset = 0; yOffset < height; yOffset++) {
             for (int xOffset = 0; xOffset < width; xOffset++) {

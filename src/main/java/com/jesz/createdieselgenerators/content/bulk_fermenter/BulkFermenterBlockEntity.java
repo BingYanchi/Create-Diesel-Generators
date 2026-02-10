@@ -144,6 +144,19 @@ public class BulkFermenterBlockEntity extends SmartBlockEntity implements IMulti
                 startProcessing();
             }
 
+            for (int yOffset = 0; yOffset < height; yOffset++) {
+                for (int xOffset = 0; xOffset < width; xOffset++) {
+                    for (int zOffset = 0; zOffset < width; zOffset++) {
+                        BlockPos pos = this.worldPosition.offset(xOffset, yOffset, zOffset);
+                        BulkFermenterBlockEntity tankAt = ConnectivityHandler.partAt(getType(), level, pos);
+                        if (tankAt == null)
+                            continue;
+                        level.updateNeighbourForOutputSignal(pos, tankAt.getBlockState()
+                                .getBlock());
+                    }
+                }
+            }
+
             if (!level.isClientSide) {
                 setChanged();
                 sendData();
@@ -256,24 +269,6 @@ public class BulkFermenterBlockEntity extends SmartBlockEntity implements IMulti
             return;
 
         needCheckRecipe = true;
-
-        for (int yOffset = 0; yOffset < height; yOffset++) {
-            for (int xOffset = 0; xOffset < width; xOffset++) {
-                for (int zOffset = 0; zOffset < width; zOffset++) {
-                    BlockPos pos = this.worldPosition.offset(xOffset, yOffset, zOffset);
-                    BulkFermenterBlockEntity tankAt = ConnectivityHandler.partAt(getType(), level, pos);
-                    if (tankAt == null)
-                        continue;
-                    level.updateNeighbourForOutputSignal(pos, tankAt.getBlockState()
-                            .getBlock());
-                }
-            }
-        }
-
-        if (!level.isClientSide) {
-            setChanged();
-            sendData();
-        }
     }
 
     @SuppressWarnings("unchecked")

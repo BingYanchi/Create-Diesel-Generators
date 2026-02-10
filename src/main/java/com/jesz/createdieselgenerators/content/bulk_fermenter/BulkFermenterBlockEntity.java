@@ -143,6 +143,11 @@ public class BulkFermenterBlockEntity extends SmartBlockEntity implements IMulti
                 currentRecipe = (BulkFermentingRecipe) r.get(0);
                 startProcessing();
             }
+
+            if (!level.isClientSide) {
+                setChanged();
+                sendData();
+            }
         }
 
         if (isController()) {
